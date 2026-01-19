@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
@@ -61,11 +60,9 @@ def login():
 
     user = User.query.filter_by(email=email).first()
 
-    if not user or not user.check_password(password):
-        return jsonify({"error": "Invalid credentials"}), 401
-
-    if not user.is_active:
-        return jsonify({"error": "Account disabled"}), 403
+    # Same error message for all failures
+    if not user or not user.check_password(password) or not user.is_active:
+        return jsonify({"error": "Invalid email or password"}), 401
 
     access_token = create_access_token(identity=user.id)
 
@@ -118,4 +115,5 @@ def deactivate():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
